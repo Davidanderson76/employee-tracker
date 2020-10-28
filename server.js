@@ -4,14 +4,19 @@
 
 const { prompt } = require("inquirer");
 const db = require("./db");
-
-// table is required //
+const logo = require("asciiart-logo");
+// table is required to display data in command line //
 require("console.table");
 
+init();
 
+function init() {
+    const logoText = logo({ name: "Employee Manager" }).render();
+    console.log(logoText);
 
+    mainPrompts();
+}
 // Loading prompts for user to select from//
-
 async function mainPrompts() {
     const { choice } = await prompt([
         {
@@ -72,7 +77,7 @@ async function mainPrompts() {
                     value: "REMOVE_DEPARTMENT"
                 },
                 {
-                    name: "Quit",
+                    name: "Exit",
                     value: "QUIT"
                 }
             ]
@@ -260,7 +265,7 @@ async function updateEmployeeManager() {
         }
     ]);
 
-    const managers = await db.allManagers(employeeId);
+    const managers = await db.findAllPossibleManagers(employeeId);
     const managerChoices = managers.map(({ id, first_name, last_name }) => ({
         name: `${ first_name } ${ last_name }`,
         value: id 
