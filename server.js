@@ -5,6 +5,10 @@
 const { prompt } = require("inquirer");
 const db = require("./db");
 
+// table is required //
+require("console.table");
+
+
 
 // Loading prompts for user to select from//
 
