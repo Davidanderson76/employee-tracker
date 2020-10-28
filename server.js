@@ -68,8 +68,8 @@ async function mainPrompts() {
                     value: "REMOVE_DEPARTMENT"
                 },
                 {
-                    name: "Exit",
-                    value: "EXIT"
+                    name: "Quit",
+                    value: "QUIT"
                 }
             ]
         }
@@ -105,11 +105,12 @@ async function mainPrompts() {
         case "UPDATE_EMPLOYEE_MANAGER":
             return updateEmployeeManager();
         default:
-            return exit();
+            return quit();
     }
 }
 
 // Function if view employees is selected //
+
 async function viewEmployees() {
     const employees = await db.findAllEmployees();
 
@@ -120,6 +121,7 @@ async function viewEmployees() {
 }
 
 // Function if view employees by department is selected //
+
 async function viewEmployeesByDepartment() {
     const departments = await db.findAllDepartments();
     const departmentChoices = departments.map(({ id, name }) => ({
@@ -142,6 +144,8 @@ async function viewEmployeesByDepartment() {
 
     mainPrompts();
 }
+
+// Function to view all employees by Manager //
 
 async function viewEmployeesByManager() {
     const managers = await db.findAllEmployees();
@@ -171,6 +175,8 @@ async function viewEmployeesByManager() {
     mainPrompts();
 }
 
+// Function to remove employees from database //
+
 async function removeEmployee() {
     const employees = await db.findAllEmployees();
     const employeeChoices = employees.map(({ id, first_name, last_name }) => ({
@@ -192,6 +198,8 @@ async function removeEmployee() {
 
     mainPrompts();
 }
+
+// Function to update employee roles //
 
 async function updateEmployeeRole() {
     const employees = await db.findAllEmployees();
@@ -229,6 +237,8 @@ async function updateEmployeeRole() {
 
     mainPrompts();
 }
+
+// Function to update employee managers //
 
 async function updateEmployeeManager() {
     const employees = await db.findAllEmployees();
@@ -308,6 +318,7 @@ async function addRole() {
 }
 
 // Function to remove roles and employees associated with that role //
+
 async function removeRole() {
     const roles = await db.findAllRoles();
     const roleChoices = roles.map(({ id, title }) => ({
@@ -331,6 +342,7 @@ async function removeRole() {
 }
 
 // Function to view all departments //
+
 async function viewDepartments() {
     const departments = await db.findAllDepartments();
     console.log( "\n" );
@@ -340,6 +352,7 @@ async function viewDepartments() {
 }
 
 // Function to add departments //
+
 async function addDepartment() {
     const department = await prompt([
         {
@@ -355,6 +368,7 @@ async function addDepartment() {
 }
 
 // Function to remove departments //
+
 async function removeDepartment() {
     const departments = await db.findAllDepartments();
     const departmentChoices = departments.map(({ id, name }) => ({
@@ -373,4 +387,60 @@ async function removeDepartment() {
     console.log(`Successfully removed from the database!`);
 
     mainPrompts();
+}
+
+// Function to add an employee //
+
+async function addEmployee() {
+    const roles = await db.findAllRoles();
+    const employees = await db.findAllEmployees();
+    const employee = await prompt([
+        {
+            name: "first_name",
+            message: "Enter the employee's first name?"
+        },
+        {
+            name: "last_name",
+            message: "Enter the employee's last name"
+        }
+    ]);
+
+    const roleChoices = roles.map(({ id, title }) => ({
+        name: title,
+        value: id
+    }));
+
+    const { roleId } =await prompt({
+        type: "list",
+        name: "roleId",
+        message: "Select the employee's role",
+        choices: roleChoices
+    });
+
+    employee.role_id = roleId;
+    const managerChoices = employees.map(({ id, first_name, last_name }) => ({
+        name: `${first_name} ${last_name}`,
+        value: id
+    }));
+    managerChoices.unshift({ name: "None", value: null });
+    const { managerId } = await prompt({
+        type: "list",
+        name: "managerId",
+        message: "Who will be the selected employee's manager?",
+        choices: managerChoices
+    });
+
+    employee.manager_id = managerId;
+    await db.createEmployee(employee);
+
+    console.log(`Successfully added ${ employee.first_name } ${ employee.last_name } to the database!`);
+
+    mainPrompts();
+}
+
+// function to exit program //
+
+function quit() {
+    console.log("See you next time!");
+    process.exit();
 }
